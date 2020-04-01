@@ -1,7 +1,8 @@
 // npm installed modules
+require("express-async-errors"); // this will automatically catches the errors asynchronously
+const { InfoLogger } = require("./config/logger");
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
-const mongoose = require("mongoose");
 var logger = require("morgan");
 const express = require("express");
 const app = express();
@@ -14,7 +15,9 @@ const rentals = require("./routes/rentals");
 const users = require("./routes/users");
 const auth = require("./routes/auth");
 
-require("dotenv").config({ path: "./config.env" });
+// configurations
+require("./config/mongoConnect");
+require("./config/logger");
 
 // to check whether the jwtPrivateKey env variable is set or not
 if (!process.env.JWT_PRIVATE_KEY) {
@@ -26,15 +29,9 @@ if (!process.env.JWT_PRIVATE_KEY) {
 app.use(logger("dev"));
 app.use(express.json());
 
-mongoose
-  .connect("mongodb://localhost/Rest_API_Practice", {
-    useUnifiedTopology: true,
-    useNewUrlParser: true
-  })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch(err => console.log(err));
-
 app.get("/", (req, res) => {
+  // InfoLogger.info("hit / route");
+  // throw new Error("intentinally throwing error");
   res.send({
     API: [
       "/api/genres",
