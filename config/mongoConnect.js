@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
+const { InfoLogger } = require("../config/logger");
 
 mongoose
   .connect(process.env.DB_HOST, {
     useUnifiedTopology: true,
     useNewUrlParser: true
   })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch(err => console.log(err));
+  .then(() => {
+    //InfoLogger.info("Connected to MongoDB") // activate this for production
+    console.log("Connected to MongoDB");
+  });
 
 module.exports = mongoose;

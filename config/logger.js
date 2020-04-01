@@ -1,7 +1,12 @@
 /**
  * installing dependancies
  */
-const { createLogger, transports, format } = (winston = require("winston"));
+const {
+  createLogger,
+  transports,
+  format,
+  exceptions
+} = (winston = require("winston"));
 const winstonMongo = require("winston-mongodb");
 const path = require("path");
 
@@ -57,6 +62,18 @@ WarningLogger = createLogger({
   ]
 });
 
+winston.exceptions.handle(
+  new winston.transports.Console({
+    colorize: true,
+    prettyPrint: true
+  }),
+  new winston.transports.File({
+    level: "error",
+    filename: path.join(__dirname, "../logs/unhandle.log"),
+    format: format.combine(format.timestamp(), format.json())
+  })
+);
+
 // this will add another type of transport to the logger instance if the app is production
 // then the logs also comes to console
 if (process.env.NODE_ENV !== "production") {
@@ -67,4 +84,22 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-module.exports = { ErrorLogger, InfoLogger, WarningLogger };
+// this is to catch the uncaught errors using node process
+let uncaughtExceptionHandler = function() {
+  // to handle uncaught exeptions
+  process.on("uncaughtException", ex => {
+    process.exit(0);
+  });
+
+  // to handle unhandled rejections
+  process.on("unhandledRejection", ex => {
+    throw ex;
+  });
+};
+
+module.exports = {
+  ErrorLogger,
+  InfoLogger,
+  WarningLogger,
+  uncaughtExceptionHandler
+};

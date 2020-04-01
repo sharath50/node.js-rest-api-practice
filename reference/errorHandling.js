@@ -53,3 +53,21 @@ function asyncMiddleware(handler) {
 // just import the above module to main app, thats all..!
 // and write routers usually without try catch block
 require("express-async-errors");
+
+// *** if error accures outside of the req , res cycle
+// handing unhandled exception errors
+// by subscribing to uncaughtException event we can handle the error
+throw Error("thown error outside of express req, res");
+process.on("uncaughtException", ex => {
+  console.log("We got an exception");
+  winston.log("error", ex.message, ex);
+});
+
+// if the error is asynchronous then above code won't work
+let p = Promise.reject(new Error("rejected promise"));
+p.then(() => console.log("done"));
+// this will give
+process.on("unhandledRejection", ex => {
+  console.log("We got a rejection");
+  winston.log("error", ex.message, ex);
+});
